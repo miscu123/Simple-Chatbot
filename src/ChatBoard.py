@@ -3,15 +3,21 @@ Board .py file where the bot will be implemented
 """
 from PySide6.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout)
 from PySide6.QtCore import Qt
+from Parser import Parser
+import json
 
 
 class Board(QWidget):
     def __init__(self):
         super().__init__()
+        self.data = None
+        initjson(self)
+        self.parser = Parser()
+
         # labels and buttons
-        self.setFixedSize(600, 600)
+        self.setFixedSize(800, 800)
         self.setWindowTitle("Funny Chatbot")
-        self.label = QLabel("How can I amuse you today?")
+        self.label = QLabel("Bot: How can I amuse you today?")
         self.input = QLineEdit()
         self.ok = QPushButton("OK")
         self.cancel = QPushButton("Cancel")
@@ -44,6 +50,16 @@ class Board(QWidget):
         if text.strip():
             response_label = QLabel(f"You: {text}")
             self.response_area.addWidget(response_label)
+
+            # we check if the bot can respond to the question or not
+            parsed_text = self.parser.parse_txt(text)
+            response = self.data.get(parsed_text)
+            if response:
+                bot_label = QLabel(f"Bot: {response}")
+            else:
+                bot_label = QLabel("Bot: Îmi pare rău, nu știu răspunsul la această întrebare.")
+
+            self.response_area.addWidget(bot_label)
             self.input.clear()
 
     def keyPressEvent(self, event):
@@ -53,3 +69,9 @@ class Board(QWidget):
             self.close()
         else:
             event.ignore()
+
+
+# json initialization function
+def initjson(self):
+    with open('./docs/Q&A.json', 'r', encoding='utf-8') as file:
+        self.data = json.load(file)
