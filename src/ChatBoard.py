@@ -3,6 +3,8 @@ Board .py file where the bot will be implemented
 """
 from PySide6.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout)
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
+
 from Parser import Parser
 import json
 
@@ -11,13 +13,21 @@ class Board(QWidget):
     def __init__(self):
         super().__init__()
         self.data = None
+
+        # initialize data from Q&A json
         initjson(self)
+
+        # create parser to format the input
         self.parser = Parser()
+
+        # font and size
+        font = QFont("Arial", 12)
 
         # labels and buttons
         self.setFixedSize(800, 800)
         self.setWindowTitle("Funny Chatbot")
-        self.label = QLabel("Bot: How can I amuse you today?")
+        self.label = QLabel("Bot: Cum te pot face sa zambesti?")
+        self.label.setFont(font)
         self.input = QLineEdit()
         self.ok = QPushButton("OK")
         self.cancel = QPushButton("Cancel")
@@ -39,16 +49,20 @@ class Board(QWidget):
 
         self.layout.addWidget(self.input)
         self.layout.addLayout(buttons)
-
         self.setLayout(self.layout)
+        self.button_pressed()
 
+    def button_pressed(self):
         self.ok.clicked.connect(self.update_text)
         self.cancel.clicked.connect(self.close)
 
     def update_text(self):
         text = self.input.text()
+        font_n = QFont("Arial", 12)
         if text.strip():
             response_label = QLabel(f"You: {text}")
+            response_label.setFont(font_n)
+            response_label.setAlignment(Qt.AlignRight)
             self.response_area.addWidget(response_label)
 
             # we check if the bot can respond to the question or not
@@ -59,6 +73,7 @@ class Board(QWidget):
             else:
                 bot_label = QLabel("Bot: Îmi pare rău, nu știu răspunsul la această întrebare.")
 
+            bot_label.setFont(font_n)
             self.response_area.addWidget(bot_label)
             self.input.clear()
 

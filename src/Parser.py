@@ -3,7 +3,7 @@ Parser .py file to parse the message and return an answer
 
 ex: "Ce MAI faci?" --> "ce mai faci"   |
     "CE MAI FACI" --> "ce mai faci"    | same answer for all 3 inputs
-    "<><CE MAI.. faci???" --> "ce mai faci" |
+    "<><CE M.,AI faci???" --> "ce mai faci" |
 """
 import re
 
