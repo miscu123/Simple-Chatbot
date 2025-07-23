@@ -1,10 +1,13 @@
 """
 Board .py file where the bot will be implemented
 """
-from PySide6.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout)
+from PySide6 import QtCore
+from PySide6.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea,
+                               QSizePolicy)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
 
+from Design import Design
+from Options import OptionsDialog
 from Parser import Parser
 import json
 
@@ -20,62 +23,101 @@ class Board(QWidget):
         # create parser to format the input
         self.parser = Parser()
 
-        # font and size
-        font = QFont("Arial", 12)
-
         # labels and buttons
-        self.setFixedSize(800, 800)
+        self.showFullScreen()
+        self.setMinimumSize(600, 600)
         self.setWindowTitle("Funny Chatbot")
-        self.label = QLabel("Bot: Cum te pot face sa zambesti?")
-        self.label.setFont(font)
+        self.label = QLabel("Bot: Cum te pot face să zâmbești?")
+        self.label.setObjectName("greetingLabel")
         self.input = QLineEdit()
+        self.input.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.ok = QPushButton("OK")
         self.cancel = QPushButton("Cancel")
+        self.cancel.setObjectName("cancel")  # IMPORTANT: setează ID-ul pentru CSS
+        self.options = QPushButton("Options")
 
         # buttons layout style (H)
         buttons = QHBoxLayout()
         buttons.addWidget(self.ok)
         buttons.addWidget(self.cancel)
+        buttons.addWidget(self.options)
+
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        self.messages_widget = QWidget()
+        self.messages_layout = QVBoxLayout()
+        self.messages_layout.setAlignment(Qt.AlignTop)
+        self.messages_widget.setLayout(self.messages_layout)
+
+        self.scroll_area.setWidget(self.messages_widget)
 
         # whole board layout style (V)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.label)
-
-        # response area style (V)
-        self.response_area = QVBoxLayout()
-        self.layout.addLayout(self.response_area)
-
-        self.layout.addStretch(1)
-
+        self.layout.addWidget(self.scroll_area)
         self.layout.addWidget(self.input)
         self.layout.addLayout(buttons)
+
         self.setLayout(self.layout)
         self.button_pressed()
 
+        self.design = Design(self)
+
+    # function for when we press a button
     def button_pressed(self):
         self.ok.clicked.connect(self.update_text)
         self.cancel.clicked.connect(self.close)
+        self.options.clicked.connect(self.show_commands)
 
     def update_text(self):
-        text = self.input.text()
-        font_n = QFont("Arial", 12)
-        if text.strip():
-            response_label = QLabel(f"You: {text}")
-            response_label.setFont(font_n)
-            response_label.setAlignment(Qt.AlignRight)
-            self.response_area.addWidget(response_label)
+        # Get input
+        text = self.input.text().strip()
+        if not text:
+            return  # Skip if empty
 
-            # we check if the bot can respond to the question or not
-            parsed_text = self.parser.parse_txt(text)
-            response = self.data.get(parsed_text)
-            if response:
-                bot_label = QLabel(f"Bot: {response}")
-            else:
-                bot_label = QLabel("Bot: Îmi pare rău, nu știu răspunsul la această întrebare.")
+        user_msg = QLabel(f"You: {text}")
+        self.design.style_message_label(user_msg, 'user')
 
-            bot_label.setFont(font_n)
-            self.response_area.addWidget(bot_label)
-            self.input.clear()
+        # user message
+        user_container = QWidget()
+        user_layout = QHBoxLayout()
+        user_layout.addStretch(1)
+        user_layout.addWidget(user_msg)
+        user_container.setLayout(user_layout)
+        self.messages_layout.addWidget(user_container)
+
+        # bot response
+        matched_key = self.parser.match_fuzzy(text, self.data.keys())
+        bot_response = self.data[
+            matched_key] if matched_key else "Îmi pare rău, nu știu răspunsul la această întrebare."
+
+        # bot message
+        bot_msg = QLabel(f"Bot: {bot_response}")
+        self.design.style_message_label(bot_msg, 'bot')
+
+        # Setup bot message container
+        bot_container = QWidget()
+        bot_layout = QHBoxLayout()
+        bot_layout.addWidget(bot_msg)
+        bot_layout.addStretch(1)  # Push left
+        bot_container.setLayout(bot_layout)
+        self.messages_layout.addWidget(bot_container)
+
+        self.input.clear()
+
+        # Force UI update
+        self.messages_widget.updateGeometry()
+        self.messages_layout.update()
+
+        # Auto-scroll with delay
+        QtCore.QTimer.singleShot(50, lambda: self.scroll_to_bottom())
+
+    def scroll_to_bottom(self):
+        scroll_bar = self.scroll_area.verticalScrollBar()
+        scroll_bar.setValue(scroll_bar.maximum())
+        QtCore.QTimer.singleShot(10, lambda: scroll_bar.setValue(scroll_bar.maximum()))
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
@@ -84,6 +126,13 @@ class Board(QWidget):
             self.close()
         else:
             event.ignore()
+
+    def show_commands(self):
+        if not self.data:
+            return
+
+        dialog = OptionsDialog(commands=self.data.keys(), parent=self)
+        dialog.exec()
 
 
 # json initialization function
