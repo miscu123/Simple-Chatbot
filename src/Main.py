@@ -6,6 +6,6 @@ from PySide6.QtWidgets import QApplication
 from ChatBoard import Board
 
 app = QApplication(sys.argv)
-window = Board()
+window = Board()  # initiate the ChatBoard class
 window.show()
 sys.exit(app.exec())

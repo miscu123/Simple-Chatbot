@@ -8,16 +8,19 @@ class OptionsDialog(QDialog):
         self.setWindowTitle("Chatbot commands")
         self.setMinimumSize(400, 300)
 
+        # option dialog layout (V)
         layout = QVBoxLayout()
 
         label = QLabel("Available commands:")
         label.setFont(QFont("Arial", 12, QFont.Bold))
         layout.addWidget(label)
 
+        # show the available commands
         self.list_widget = QListWidget()
         self.list_widget.addItems(sorted(commands))
         layout.addWidget(self.list_widget)
 
+        # close button layout (H)
         button_layout = QHBoxLayout()
         close_btn = QPushButton("Close window")
         close_btn.clicked.connect(self.close)

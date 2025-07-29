@@ -10,6 +10,7 @@ class Design:
         self.setup_fonts()
         self.setup_layout_spacing()
 
+    # apply styles to the board
     def apply_styles(self):
         self.board.setStyleSheet("""
                 QWidget {
@@ -192,7 +193,6 @@ class Design:
         self.board.messages_layout.setContentsMargins(16, 16, 16, 16)
 
     def add_glassmorphism_effect(self, widget):
-        # Add glassmorphism effect to any widget
         widget.setStyleSheet(widget.styleSheet() + """
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
@@ -200,14 +200,14 @@ class Design:
             border-radius: 16px;
         """)
 
+    # implement some transitions
     def add_subtle_animation_class(self):
-        # CSS-like transition effects (can be used with QPropertyAnimation)
         return """
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         """
 
+    # Modern color palette for consistent theming
     def get_theme_colors(self):
-        # Modern color palette for consistent theming
         return {
             'primary': '#64ffda',
             'primary_hover': '#4ecdc4',

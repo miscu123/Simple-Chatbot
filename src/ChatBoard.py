@@ -5,7 +5,6 @@ from PySide6 import QtCore
 from PySide6.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea,
                                QSizePolicy)
 from PySide6.QtCore import Qt
-
 from Design import Design
 from Options import OptionsDialog
 from Parser import Parser
@@ -25,7 +24,6 @@ class Board(QWidget):
 
         # labels and buttons
         self.showFullScreen()
-        self.setMinimumSize(600, 600)
         self.setWindowTitle("Funny Chatbot")
         self.label = QLabel("Bot: Cum te pot face să zâmbești?")
         self.label.setObjectName("greetingLabel")
@@ -33,8 +31,8 @@ class Board(QWidget):
         self.input.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.ok = QPushButton("OK")
         self.cancel = QPushButton("Cancel")
-        self.cancel.setObjectName("cancel")  # IMPORTANT: setează ID-ul pentru CSS
-        self.options = QPushButton("Options")
+        self.cancel.setObjectName("cancel")
+        self.options = QPushButton("Commands")
 
         # buttons layout style (H)
         buttons = QHBoxLayout()
@@ -42,6 +40,7 @@ class Board(QWidget):
         buttons.addWidget(self.cancel)
         buttons.addWidget(self.options)
 
+        # set the widget and make it resizable
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -93,7 +92,6 @@ class Board(QWidget):
         bot_response = self.data[
             matched_key] if matched_key else "Îmi pare rău, nu știu răspunsul la această întrebare."
 
-        # bot message
         bot_msg = QLabel(f"Bot: {bot_response}")
         self.design.style_message_label(bot_msg, 'bot')
 
